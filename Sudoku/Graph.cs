@@ -15,13 +15,15 @@ namespace Sudoku
         public List<Node> nodes;
         public bool[][] adjacencyMatrix;
         public int[] parent;
+        int N;
         public Graph(int N)
         {
+            this.N = N;
             int x = 0, y = 0;
-            nodes = new List<Node>(N*N);
-            adjacencyMatrix = new bool[N*N][];
-            parent = new int[N*N];
-            for (int i = 0; i < N*N; i++)
+            nodes = new List<Node>(N * N);
+            adjacencyMatrix = new bool[N * N][];
+            parent = new int[N * N];
+            for (int i = 0; i < N * N; i++)
             {
                 Node node = new Node(i);
                 node.x = x;
@@ -37,106 +39,126 @@ namespace Sudoku
                 }
             }
         }
-        int getCoverageOfNode(int nodeIdx, List<int> currentNodes)
+        public void ColorGraph(List<Tuple<int, int>> coloredNodes)
         {
-            int coverageNodeIdx = nodeIdx;
-            int max_ConnectedNodes = 0;
-            for (int i = 0; i < currentNodes.Count; i++)
-            {
-                if (adjacencyMatrix[nodeIdx][currentNodes[i]] || currentNodes[i] == nodeIdx) continue;
-
-                int num_ConnectedNodes = 0;
-                int commonNodes = 0, currentConnectedNodes = 0;
-                for (int j = 0; j < currentNodes.Count; j++)
-                {
-                    if (adjacencyMatrix[currentNodes[i]][currentNodes[j]] && adjacencyMatrix[nodeIdx][currentNodes[j]]) commonNodes++;
-                    if (adjacencyMatrix[nodeIdx][currentNodes[j]]) num_ConnectedNodes++;
-                    if (adjacencyMatrix[currentNodes[i]][currentNodes[j]]) currentConnectedNodes++;
-                }
-                if (commonNodes == num_ConnectedNodes && currentConnectedNodes >= max_ConnectedNodes)
-                {
-                    max_ConnectedNodes = currentConnectedNodes;
-                    coverageNodeIdx = currentNodes[i];
-                }
-            }
-            return coverageNodeIdx;
-        }
-        bool isCompleteGraph(List<int> currentNodes)
-        {
-            int num_AllConnection = (currentNodes.Count*(currentNodes.Count-1));
-            for (int i = 0; i < currentNodes.Count; i++)
-            {
-                for (int j = 0; j < currentNodes.Count; j++)
-                {
-                    if (adjacencyMatrix[currentNodes[i]][currentNodes[j]]) num_AllConnection--;
-                }
-            }
-            return (num_AllConnection == 0);
-        }
-        public void ColorNode(int i)
-        {
-            int N = nodes.Count;
-            bool[] vis = new bool[N];
-            int j = 0;
-            for (j = 0; j < nodes[i].connectedNodes.Count; j++)
-            {
-                if (nodes[nodes[i].connectedNodes[j]].colorValue != -1)
-                    vis[nodes[nodes[i].connectedNodes[j]].colorValue] = true;
-            }
-            j = 0;
-            while (vis[j]) j++;
-            nodes[i].colorValue = j;
-        }
-        public void ColorGraph()
-        {
-            Color[] colors = new Color[nodes.Count];
+            Color[] colors = new Color[nodes.Count + 1];
             Random rand = new Random();
-            for (int i = 0; i < nodes.Count; i++)
+            for (int i = 1; i <= nodes.Count; i++)
             {
                 colors[i] = Color.FromArgb(rand.Next(0, 255), rand.Next(0, 255), rand.Next(0, 255));
             }
-            for (int i = 0; i < nodes.Count; i++)
+            var grouping = coloredNodes.GroupBy(v => v.Item2);
+            bool[] usedColors = new bool[nodes.Count + 1];
+            foreach (var group in grouping)
             {
-                if (nodes[i].colorValue == -1)
-                    ColorNode(i);
-                nodes[i].color = colors[nodes[i].colorValue];
+                var assignedDigit = group.FirstOrDefault(cell => nodes[cell.Item1].colorValue != -1);
+                if (assignedDigit != null)
+                {
+                    foreach (var graphColoringResult in group)
+                    {
+                        nodes[graphColoringResult.Item1].colorValue = nodes[assignedDigit.Item1].colorValue;
+                        nodes[graphColoringResult.Item1].color = colors[nodes[assignedDigit.Item1].colorValue];
+                        usedColors[nodes[assignedDigit.Item1].colorValue] = true;
+                    }
+                }
             }
+            int idx = 1;
+            grouping = coloredNodes.GroupBy(v => v.Item2);
+
+            foreach (var group in grouping)
+            {
+                var assignedDigit = group.FirstOrDefault(cell => nodes[cell.Item1].colorValue != -1);
+                if (assignedDigit == null)
+                {
+                    while (usedColors[idx]) idx++;
+                    foreach (var graphColoringResult in group)
+                    {
+                        nodes[graphColoringResult.Item1].colorValue = idx;
+                        nodes[graphColoringResult.Item1].color = colors[idx];
+                        usedColors[idx] = true;
+                    }
+                }
+            }
+        }
+        int SaturatedDegree(int i, List<Tuple<int, int>> currentNodes)
+        {
+            return currentNodes.Where(n => nodes[i].connectedNodes.Contains(n.Item1)).GroupBy(n => n.Item2).Count();
+        }
+        int Degree(int i)
+        {
+            return nodes[i].connectedNodes.Count;
+        }
+        void ColorNode(int i, List<Tuple<int, int>> currentNodes, ref int colorNumber)
+        {
+            List<int> colors = currentNodes.Where(n => nodes[i].connectedNodes.Contains(n.Item1)).GroupBy(n => n.Item2).Select(g => g.Key).ToList();
+
+            if (colors.Count == colorNumber)
+            {
+                colorNumber++;
+                currentNodes.Add(new Tuple<int, int>(i, colorNumber));
+            }
+            else
+            {
+                int[] usedColors = Enumerable.Range(1, colorNumber).ToArray();
+                int colorNum = usedColors.Where(c => !colors.Contains(c)).First();
+                currentNodes.Add(new Tuple<int, int>(i, colorNum));
+            }
+        }
+        bool isColored(int i, List<Tuple<int, int>> currentNodes)
+        {
+            return currentNodes.Any(n => n.Item1 == i);
         }
         public void ApplyGraphColoring()
         {
-            bool[] vis = new bool[nodes.Count];
-            List<int> currentNodes = new List<int>();
-            int N = nodes.Count;
+            int colorNumber = 1;
+            int num_ColoredNodes = 0;
+            List<Tuple<int, int>> currentNodes = new List<Tuple<int, int>>();
+
+            while (num_ColoredNodes < nodes.Count)
+            {
+                int maxDegree = -1, idx = -1;
+                for (int i = 0; i < nodes.Count; i++)
+                {
+                    if (!isColored(i, currentNodes))
+                    {
+                        int d = SaturatedDegree(i, currentNodes);
+                        if (d > maxDegree || d == maxDegree && Degree(i) > Degree(idx))
+                        {
+                            maxDegree = d;
+                            idx = i;
+                        }
+                    }
+                }
+                ColorNode(idx, currentNodes, ref colorNumber);
+                num_ColoredNodes++;
+            }
+            ColorGraph(currentNodes);
+        }
+        public bool isGraphValid()
+        {
+            int diagonalCtr = 0, block = (int)Math.Sqrt(N);
+            int[] diagonalIndices = new int[N];
+            for (int i = 0; i < block; i++)
+            {
+                diagonalCtr = N * i;
+                for (int j = 0; j < block; j++)
+                {
+                    diagonalIndices[i * block + j] = diagonalCtr++;
+                }
+            }
             for (int i = 0; i < nodes.Count; i++)
             {
-                parent[i] = i;
-                currentNodes.Add(i);
-            }
-            for (int i = 0; i < currentNodes.Count; i++)
-            {
-                if (isCompleteGraph(currentNodes))
+                for (int j = 0; j < nodes[i].connectedNodes.Count; j++)
                 {
-                    break;
+                    if (nodes[i].colorValue == nodes[nodes[i].connectedNodes[j]].colorValue) return false;
                 }
-                int coverage = getCoverageOfNode(currentNodes[i], currentNodes);
-                if (coverage != currentNodes[i])
+                for (int j = 0; j < N; j++)
                 {
-                    vis[currentNodes[i]] = true;
-                    parent[currentNodes[i]] = coverage;
-                    currentNodes.RemoveAt(i);
-                    i--;
-                }
-                else if (i == currentNodes.Count - 1)
-                {
-                    int j = 0;
-                    while (j < N && vis[j]) j++;
-                    ColorNode(j);
-                    vis[j] = true;
-                    currentNodes.Remove(j);
-                    i = -1;
+                    int idx = diagonalIndices[j] + ((nodes[i].x / block) * block) * N + (nodes[i].y / block) * block;
+                    if (idx != i && nodes[idx].colorValue == nodes[i].colorValue) return false;
                 }
             }
-            ColorGraph();
+            return true;
         }
     }
 }

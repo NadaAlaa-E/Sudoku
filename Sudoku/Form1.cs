@@ -18,43 +18,57 @@ namespace Sudoku
             InitializeComponent();
         }
 
+        int[][] initialize()
+        {
+            int dimension_ = int.Parse(dimension.Text);
+            int[][] initialValues = new int[dimension_][];
+            for (int i = 0; i < dimension_; i++)
+            {
+                initialValues[i] = new int[dimension_];
+                for (int j = 0; j < dimension_; j++)
+                {
+                    if (sudokuGrid.Rows[i].Cells[j].Value == null)
+                        initialValues[i][j] = -1;
+                    else
+                        initialValues[i][j] = int.Parse(sudokuGrid.Rows[i].Cells[j].Value.ToString());
+                }
+            }
+            return initialValues;
+        }
+
         private void Generate_Click(object sender, EventArgs e)
         {
-            sudoku = new Sudoku(Convert.ToInt32(dimension.Text));
+            if (dimension.Text.Length == 0)
+            {
+                MessageBox.Show("Please Enter Dimension.");
+                return;
+            }
+
+            int[][] initialValues = initialize();
+
+            sudoku = new Sudoku(Convert.ToInt32(dimension.Text), initialValues);
             panel1.Refresh();
-            panel2.Refresh();
-            GenerateGraph();
-            GenerateGrid();
+            if (sudoku.graph.isGraphValid())
+            {
+                GenerateGraph();
+                GenerateGrid();
+            }
+            else
+            {
+                MessageBox.Show("Invalid Sudoku Initial Values.");
+            }
         }
 
         void GenerateGrid()
         {
             if (sudoku == null) return;
 
-            Graphics g = panel2.CreateGraphics();
-            Pen pen = new Pen(Brushes.Black, 1);
-            Font font = new Font("Arial", 20);
-            int lines = Convert.ToInt32(dimension.Text), N = lines*lines;
-            float x = 0.0f, y = 0.0f, xSpace = panel2.Width/lines, ySpace = panel2.Height/lines;
-
-            //Vertical Lines
-            for (int i = 0; i < lines + 1; i++)
+            for (int i = 0; i < sudoku.dimension; i++)
             {
-                g.DrawLine(pen, x, y, x, panel2.Height);
-                x += xSpace;
-            }          
-            //Horizontal Lines
-            x = 0.0f;
-            for (int i = 0; i < lines + 1; i++)
-            {
-                g.DrawLine(pen, x, y, panel2.Width, y);
-                y += ySpace;
-            }
-            for (int i = 0; i < N; i++)
-            {
-                x = sudoku.graph.nodes[i].x; 
-                y = sudoku.graph.nodes[i].y;
-                g.DrawString((sudoku.graph.nodes[i].colorValue+1).ToString(), font, Brushes.Black, x*xSpace, y*ySpace);
+                for (int j = 0; j < sudoku.dimension; j++)
+                {
+                    sudokuGrid.Rows[i].Cells[j].Value = sudoku.graph.nodes[i * sudoku.dimension + j].colorValue.ToString();
+                }
             }
         }
 
@@ -88,7 +102,7 @@ namespace Sudoku
                 float posX = (float)(x + c * Math.Cos(2 * Math.PI * idx / n));
                 float posY = (float)(y + c * Math.Sin(2 * Math.PI * idx / n));
                 g.FillEllipse(s, posX-r, posY-r, r, r);
-                g.DrawString((sudoku.graph.nodes[idx].colorValue + 1).ToString(), font, Brushes.AntiqueWhite, posX-r, posY-r);
+                g.DrawString((sudoku.graph.nodes[idx].colorValue).ToString(), font, Brushes.AntiqueWhite, posX-r, posY-r);
                 idx++;
             }
             g.Dispose();
@@ -97,6 +111,20 @@ namespace Sudoku
         private void panel1_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void dimension_TextChanged(object sender, EventArgs e)
+        {
+            if (dimension.Text.Length == 0) return;
+            
+            sudokuGrid.Rows.Clear();
+            sudokuGrid.RowCount = int.Parse(dimension.Text);
+            sudokuGrid.ColumnCount = int.Parse(dimension.Text);
+            for (int i = 0; i < sudokuGrid.ColumnCount; i++)
+            {
+                sudokuGrid.Columns[i].Width = (sudokuGrid.Width / (sudokuGrid.ColumnCount + 3));
+                sudokuGrid.Rows[i].Height = (sudokuGrid.Height / (sudokuGrid.RowCount + 3));
+            }
         }
     }
 }

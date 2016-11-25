@@ -32,7 +32,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.Generate = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
+            this.sudokuGrid = new System.Windows.Forms.DataGridView();
+            ((System.ComponentModel.ISupportInitialize)(this.sudokuGrid)).BeginInit();
             this.SuspendLayout();
             // 
             // dimension
@@ -41,6 +42,7 @@
             this.dimension.Name = "dimension";
             this.dimension.Size = new System.Drawing.Size(168, 31);
             this.dimension.TabIndex = 0;
+            this.dimension.TextChanged += new System.EventHandler(this.dimension_TextChanged);
             // 
             // label1
             // 
@@ -69,12 +71,14 @@
             this.panel1.Size = new System.Drawing.Size(1383, 1111);
             this.panel1.TabIndex = 3;
             // 
-            // panel2
+            // sudokuGrid
             // 
-            this.panel2.Location = new System.Drawing.Point(12, 333);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(775, 726);
-            this.panel2.TabIndex = 4;
+            this.sudokuGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.sudokuGrid.Location = new System.Drawing.Point(11, 296);
+            this.sudokuGrid.Name = "sudokuGrid";
+            this.sudokuGrid.RowTemplate.Height = 33;
+            this.sudokuGrid.Size = new System.Drawing.Size(858, 786);
+            this.sudokuGrid.TabIndex = 4;
             // 
             // Form1
             // 
@@ -82,13 +86,14 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(2278, 1135);
-            this.Controls.Add(this.panel2);
+            this.Controls.Add(this.sudokuGrid);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.Generate);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.dimension);
             this.Name = "Form1";
             this.Text = "Sudoku";
+            ((System.ComponentModel.ISupportInitialize)(this.sudokuGrid)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -100,7 +105,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button Generate;
         private System.Windows.Forms.Panel panel1;
-        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.DataGridView sudokuGrid;
     }
 }
 
