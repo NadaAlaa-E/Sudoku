@@ -13,8 +13,10 @@ namespace Sudoku
     public partial class Form1 : Form
     {
         Sudoku sudoku;
+        bool isGreedy;
         public Form1()
         {
+            isGreedy = true;
             InitializeComponent();
         }
 
@@ -44,10 +46,11 @@ namespace Sudoku
                 return;
             }
 
+            panel1.Refresh();
+
             int[][] initialValues = initialize();
 
-            sudoku = new Sudoku(Convert.ToInt32(dimension.Text), initialValues);
-            panel1.Refresh();
+            sudoku = new Sudoku(Convert.ToInt32(dimension.Text), initialValues, isGreedy);
             if (sudoku.graph.isGraphValid())
             {
                 GenerateGraph();
@@ -78,8 +81,8 @@ namespace Sudoku
 
             Graphics g = panel1.CreateGraphics();
             Font font = new Font("Arial", 15);
-            float x = panel1.Width/2, y = panel1.Height/2, r = 30;
-            int n = sudoku.dimension*sudoku.dimension, c = 10*n;
+            float x = panel1.Width/2, y = panel1.Height/2, r = 25;
+            int n = sudoku.dimension*sudoku.dimension, c = 230;
             int idx = 0;
             for (int i = 0; i < n; i++)
             {
@@ -125,6 +128,20 @@ namespace Sudoku
                 sudokuGrid.Columns[i].Width = (sudokuGrid.Width / (sudokuGrid.ColumnCount + 3));
                 sudokuGrid.Rows[i].Height = (sudokuGrid.Height / (sudokuGrid.RowCount + 3));
             }
+        }
+
+        private void domBtn_CheckedChanged(object sender, EventArgs e)
+        {
+            if (domBtn.Checked) isGreedy = false;
+            else isGreedy = true;
+            dimension_TextChanged(sender, e);
+        }
+
+        private void greedyBtn_CheckedChanged(object sender, EventArgs e)
+        {
+            if (greedyBtn.Checked) isGreedy = true;
+            else isGreedy = false;
+            dimension_TextChanged(sender, e);
         }
     }
 }

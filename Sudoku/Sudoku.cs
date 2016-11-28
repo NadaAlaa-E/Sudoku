@@ -14,13 +14,16 @@ namespace Sudoku
     {
         public int dimension;
         public Graph graph;
-        public Sudoku(int dimension, int[][] initialValues)
+        public Sudoku(int dimension, int[][] initialValues, bool isGreedy)
         {
             this.dimension = dimension;
             graph = new Graph(dimension);
             fillGraph(initialValues);
             BuildGraph();
-            graph.ApplyGraphColoring();
+            if(isGreedy)
+                graph.ApplyGraphColoring();
+            else
+                DominationCovering.ApplyGraphColoring(graph.nodes, graph.adjacencyMatrix);
         }
         public void fillGraph(int[][] initialGraph)
         {

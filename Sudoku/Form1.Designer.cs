@@ -33,6 +33,8 @@
             this.Generate = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.sudokuGrid = new System.Windows.Forms.DataGridView();
+            this.greedyBtn = new System.Windows.Forms.RadioButton();
+            this.domBtn = new System.Windows.Forms.RadioButton();
             ((System.ComponentModel.ISupportInitialize)(this.sudokuGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -56,7 +58,7 @@
             // Generate
             // 
             this.Generate.DialogResult = System.Windows.Forms.DialogResult.Yes;
-            this.Generate.Location = new System.Drawing.Point(251, 80);
+            this.Generate.Location = new System.Drawing.Point(635, 15);
             this.Generate.Name = "Generate";
             this.Generate.Size = new System.Drawing.Size(168, 42);
             this.Generate.TabIndex = 2;
@@ -80,12 +82,38 @@
             this.sudokuGrid.Size = new System.Drawing.Size(858, 786);
             this.sudokuGrid.TabIndex = 4;
             // 
+            // greedyBtn
+            // 
+            this.greedyBtn.AutoSize = true;
+            this.greedyBtn.Checked = true;
+            this.greedyBtn.Location = new System.Drawing.Point(251, 74);
+            this.greedyBtn.Name = "greedyBtn";
+            this.greedyBtn.Size = new System.Drawing.Size(209, 29);
+            this.greedyBtn.TabIndex = 5;
+            this.greedyBtn.TabStop = true;
+            this.greedyBtn.Text = "Greedy Algorithm";
+            this.greedyBtn.UseVisualStyleBackColor = true;
+            this.greedyBtn.CheckedChanged += new System.EventHandler(this.greedyBtn_CheckedChanged);
+            // 
+            // domBtn
+            // 
+            this.domBtn.AutoSize = true;
+            this.domBtn.Location = new System.Drawing.Point(251, 109);
+            this.domBtn.Name = "domBtn";
+            this.domBtn.Size = new System.Drawing.Size(339, 29);
+            this.domBtn.TabIndex = 6;
+            this.domBtn.Text = "Domination Covering Algorithm";
+            this.domBtn.UseVisualStyleBackColor = true;
+            this.domBtn.CheckedChanged += new System.EventHandler(this.domBtn_CheckedChanged);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(12F, 25F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(2278, 1135);
+            this.Controls.Add(this.domBtn);
+            this.Controls.Add(this.greedyBtn);
             this.Controls.Add(this.sudokuGrid);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.Generate);
@@ -106,6 +134,8 @@
         private System.Windows.Forms.Button Generate;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.DataGridView sudokuGrid;
+        private System.Windows.Forms.RadioButton greedyBtn;
+        private System.Windows.Forms.RadioButton domBtn;
     }
 }
 
