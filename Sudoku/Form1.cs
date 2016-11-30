@@ -119,14 +119,38 @@ namespace Sudoku
         private void dimension_TextChanged(object sender, EventArgs e)
         {
             if (dimension.Text.Length == 0) return;
-            
+
+            int dimension_ = int.Parse(dimension.Text);
             sudokuGrid.Rows.Clear();
-            sudokuGrid.RowCount = int.Parse(dimension.Text);
-            sudokuGrid.ColumnCount = int.Parse(dimension.Text);
+            sudokuGrid.RowCount = dimension_ + 1;
+            sudokuGrid.ColumnCount = dimension_;
             for (int i = 0; i < sudokuGrid.ColumnCount; i++)
             {
                 sudokuGrid.Columns[i].Width = (sudokuGrid.Width / (sudokuGrid.ColumnCount + 3));
                 sudokuGrid.Rows[i].Height = (sudokuGrid.Height / (sudokuGrid.RowCount + 3));
+            }
+
+            if (dimension_ == 9 && !isGreedy) setInitialValues(dimension_);
+        }
+
+        private void setInitialValues(int dimension_)
+        {
+            int[,] grid = {
+                         { 5, 3, 0, 0, 7, 0, 9, 1, 2 },
+                         { 6, 0, 0, 1, 9, 5, 3, 4, 0 },
+                         { 0, 9, 0, 0, 0, 0, 0, 6, 0 },
+                         { 8, 0, 9, 0, 6, 0, 0, 0, 3 },
+                         { 4, 2, 0, 8, 0, 3, 0, 0, 1 },
+                         { 7, 1, 0, 0, 2, 0, 0, 5, 6 },
+                         { 0, 6, 0, 0, 0, 0, 2, 8, 0 },
+                         { 0, 0, 0, 4, 1, 9, 0, 0, 5 },
+                         { 3, 0, 5, 2, 8, 0, 0, 7, 9 } };
+            for (int i = 0; i < dimension_; i++)
+            {
+                for (int j = 0; j < dimension_; j++)
+                {
+                    if (grid[i, j] != 0) sudokuGrid.Rows[i].Cells[j].Value = grid[i, j].ToString();
+                }
             }
         }
 
